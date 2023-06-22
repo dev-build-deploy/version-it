@@ -23,7 +23,6 @@ type SemVerVersionCore = "major" | "minor" | "patch";
  * @member preRelease Pre-release identifier
  * @member build Build identifier
  * @method toString Returns the SemVer as a string
- * @internal
  */
 export interface ISemVer {
   prefix?: string;
