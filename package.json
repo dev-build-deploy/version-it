@@ -6,7 +6,7 @@
   "types": "lib/index.d.ts",
   "scripts": {
     "build": "tsc",
-    "test": "jest",
+    "test": "jest --coverage",
     "lint": "eslint --ext .ts .",
     "format": "prettier --write **/*.ts && prettier --write **/*.ts"
   },
@@ -35,6 +35,6 @@
     "typescript": "^5.1.3"
   },
   "files": [
-    "lib/**/*"
+    "lib/*"
   ]
 }
