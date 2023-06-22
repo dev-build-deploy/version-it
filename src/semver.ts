@@ -45,7 +45,7 @@ export interface ISemVer {
  * @method toString Returns the SemVer as a string
  * @throws Error Unable to parse version
  */
-export class SemVer implements IVersion<SemVer, SemVerVersionCore | SemVerIdentifier>, ISemVer {
+export class SemVer implements IVersion<SemVer, keyof ISemVer>, ISemVer {
   prefix?: string;
   major: number;
   minor: number;
@@ -110,7 +110,7 @@ export class SemVer implements IVersion<SemVer, SemVerVersionCore | SemVerIdenti
    * @param type Type of increment
    * @returns Incremented SemVer
    */
-  increment(type: SemVerVersionCore | SemVerIdentifier): SemVer {
+  increment(type: keyof ISemVer): SemVer {
     switch (type) {
       case "preRelease":
         return new SemVer({ ...this, preRelease: this.incrementIdentifier(type) ?? "rc.1", build: undefined });
@@ -122,6 +122,8 @@ export class SemVer implements IVersion<SemVer, SemVerVersionCore | SemVerIdenti
         return new SemVer({ prefix: this.prefix, major: this.major, minor: this.minor + 1 });
       case "patch":
         return new SemVer({ prefix: this.prefix, major: this.major, minor: this.minor, patch: this.patch + 1 });
+      case "prefix":
+        throw new Error("Unable to increment prefix");
     }
   }
 
