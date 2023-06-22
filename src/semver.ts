@@ -45,7 +45,6 @@ export interface ISemVer {
  * @member build Build identifier
  * @method toString Returns the SemVer as a string
  * @throws Error Unable to parse version
- * @internal
  */
 export class SemVer implements IVersion<SemVer, SemVerVersionCore | SemVerIdentifier>, ISemVer {
   prefix?: string;
