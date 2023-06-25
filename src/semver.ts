@@ -22,7 +22,6 @@ type SemVerVersionCore = "major" | "minor" | "patch";
  * @member patch Patch version
  * @member preRelease Pre-release identifier
  * @member build Build identifier
- * @method toString Returns the SemVer as a string
  */
 export interface ISemVer {
   prefix?: string;
@@ -43,7 +42,6 @@ export interface ISemVer {
  * @member preRelease Pre-release identifier
  * @member build Build identifier
  * @method toString Returns the SemVer as a string
- * @throws Error Unable to parse version
  */
 export class SemVer implements IVersion<SemVer, keyof ISemVer>, ISemVer {
   prefix?: string;
@@ -148,7 +146,7 @@ export class SemVer implements IVersion<SemVer, keyof ISemVer>, ISemVer {
   }
 
   /**
-   * Function which returns 0 when current version is equal to the provided version,
+   * Returns 0 when current version is equal to the provided version,
    * 1 when current version is greater than the provided version,
    * and -1 when current version is less than the provided version.
    *
