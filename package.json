@@ -14,7 +14,8 @@
   "license": "GPL-3.0-or-later",
   "keywords": [
     "Versioning",
-    "SemVer"
+    "SemVer",
+    "CalVer"
   ],
   "repository": {
     "type": "git",
