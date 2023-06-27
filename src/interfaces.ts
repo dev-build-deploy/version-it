@@ -52,7 +52,6 @@ export interface IComparable<T> {
  * @extends IComparable
  * @template T Version type
  * @template Y Increment type
- * @internal
  */
 export interface IVersion<T, Y> extends IComparable<T> {
   /**

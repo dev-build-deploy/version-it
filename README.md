@@ -35,7 +35,7 @@ const previousVersion = new SemVer({
 });
 
 // Increment the version
-const newVersion = currentVersion.increment("preRelease");
+const newVersion = currentVersion.increment("PRERELEASE");
 ```
 
 ### Incrementing the version
@@ -44,11 +44,11 @@ The following increment types can be applied when using `.increment(...)`:
 
 | Type | Description |
 | --- | --- |
-| `major` | Increments the `MAJOR` version core |
-| `minor` | Increments the `MINOR` version core |
-| `patch` | Increments the `PATCH` version core |
-| `preRelease` | Increments the `PRERELEASE` or adds `-rc.1` in case no `PRERELEASE` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `-alpha.1`, `-rc.7`) |
-| `build` | Increments the `BUILD` or adds `+build.1` in case no `BUILD` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `+build.1`, `+attempt.3`) |
+| `MAJOR` | Increments the `MAJOR` version core |
+| `MINOR` | Increments the `MINOR` version core |
+| `PATCH` | Increments the `PATCH` version core |
+| `PRERELEASE` | Increments the `PRERELEASE` or adds `-rc.1` in case no `PRERELEASE` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `-alpha.1`, `-rc.7`) |
+| `BUILD` | Increments the `BUILD` or adds `+build.1` in case no `BUILD` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `+build.1`, `+attempt.3`) |
 
 ## Calendar Versioning
 
