@@ -15,6 +15,17 @@ type SemVerIdentifier = "preRelease" | "build";
 type SemVerVersionCore = "major" | "minor" | "patch";
 
 /**
+ * SemVer increment types
+ * @type SemVerIncrement
+ * @member major Major version
+ * @member minor Minor version
+ * @member patch Patch version
+ * @member preRelease Pre-release identifier
+ * @member build Build identifier
+ */
+export type SemVerIncrement = "MAJOR" | "MINOR" | "PATCH" | "PRERELEASE" | "BUILD";
+
+/**
  * A simple SemVer implementation
  * @interface ISemVer
  * @member major Major version
@@ -22,6 +33,7 @@ type SemVerVersionCore = "major" | "minor" | "patch";
  * @member patch Patch version
  * @member preRelease Pre-release identifier
  * @member build Build identifier
+ * @internal
  */
 export interface ISemVer {
   prefix?: string;
@@ -43,7 +55,7 @@ export interface ISemVer {
  * @member build Build identifier
  * @method toString Returns the SemVer as a string
  */
-export class SemVer implements IVersion<SemVer, keyof ISemVer>, ISemVer {
+export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
   prefix?: string;
   major: number;
   minor: number;
@@ -108,20 +120,22 @@ export class SemVer implements IVersion<SemVer, keyof ISemVer>, ISemVer {
    * @param type Type of increment
    * @returns Incremented SemVer
    */
-  increment(type: keyof ISemVer): SemVer {
+  increment(type: SemVerIncrement): SemVer {
     switch (type) {
-      case "preRelease":
-        return new SemVer({ ...this, preRelease: this.incrementIdentifier(type) ?? "rc.1", build: undefined });
-      case "build":
-        return new SemVer({ ...this, preRelease: this.preRelease, build: this.incrementIdentifier(type) ?? "build.1" });
-      case "major":
+      case "PRERELEASE":
+        return new SemVer({ ...this, preRelease: this.incrementIdentifier("preRelease") ?? "rc.1", build: undefined });
+      case "BUILD":
+        return new SemVer({
+          ...this,
+          preRelease: this.preRelease,
+          build: this.incrementIdentifier("build") ?? "build.1",
+        });
+      case "MAJOR":
         return new SemVer({ prefix: this.prefix, major: this.major + 1 });
-      case "minor":
+      case "MINOR":
         return new SemVer({ prefix: this.prefix, major: this.major, minor: this.minor + 1 });
-      case "patch":
+      case "PATCH":
         return new SemVer({ prefix: this.prefix, major: this.major, minor: this.minor, patch: this.patch + 1 });
-      case "prefix":
-        throw new Error("Unable to increment prefix");
     }
   }
 

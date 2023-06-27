@@ -156,60 +156,60 @@ describe("Comparators", () => {
 
 describe("increment version", () => {
   test("increment major", () => {
-    expect(new SemVer("0.0.1")?.increment("major").toString()).toBe("1.0.0");
-    expect(new SemVer("0.1.0")?.increment("major").toString()).toBe("1.0.0");
-    expect(new SemVer("1.0.0")?.increment("major").toString()).toBe("2.0.0");
-    expect(new SemVer("1.0.0-rc.1")?.increment("major").toString()).toBe("2.0.0");
-    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("major").toString()).toBe("2.0.0");
+    expect(new SemVer("0.0.1")?.increment("MAJOR").toString()).toBe("1.0.0");
+    expect(new SemVer("0.1.0")?.increment("MAJOR").toString()).toBe("1.0.0");
+    expect(new SemVer("1.0.0")?.increment("MAJOR").toString()).toBe("2.0.0");
+    expect(new SemVer("1.0.0-rc.1")?.increment("MAJOR").toString()).toBe("2.0.0");
+    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("MAJOR").toString()).toBe("2.0.0");
   });
 
   test("increment minor", () => {
-    expect(new SemVer("0.0.1")?.increment("minor").toString()).toBe("0.1.0");
-    expect(new SemVer("0.1.0")?.increment("minor").toString()).toBe("0.2.0");
-    expect(new SemVer("1.0.0")?.increment("minor").toString()).toBe("1.1.0");
-    expect(new SemVer("1.0.0-rc.1")?.increment("minor").toString()).toBe("1.1.0");
-    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("minor").toString()).toBe("1.1.0");
+    expect(new SemVer("0.0.1")?.increment("MINOR").toString()).toBe("0.1.0");
+    expect(new SemVer("0.1.0")?.increment("MINOR").toString()).toBe("0.2.0");
+    expect(new SemVer("1.0.0")?.increment("MINOR").toString()).toBe("1.1.0");
+    expect(new SemVer("1.0.0-rc.1")?.increment("MINOR").toString()).toBe("1.1.0");
+    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("MINOR").toString()).toBe("1.1.0");
   });
 
   test("increment patch", () => {
-    expect(new SemVer("0.0.1")?.increment("patch").toString()).toBe("0.0.2");
-    expect(new SemVer("0.1.0")?.increment("patch").toString()).toBe("0.1.1");
-    expect(new SemVer("1.0.0")?.increment("patch").toString()).toBe("1.0.1");
-    expect(new SemVer("1.0.0-rc.1")?.increment("patch").toString()).toBe("1.0.1");
-    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("patch").toString()).toBe("1.0.1");
+    expect(new SemVer("0.0.1")?.increment("PATCH").toString()).toBe("0.0.2");
+    expect(new SemVer("0.1.0")?.increment("PATCH").toString()).toBe("0.1.1");
+    expect(new SemVer("1.0.0")?.increment("PATCH").toString()).toBe("1.0.1");
+    expect(new SemVer("1.0.0-rc.1")?.increment("PATCH").toString()).toBe("1.0.1");
+    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("PATCH").toString()).toBe("1.0.1");
   });
 
   test("increment preRelease", () => {
-    expect(new SemVer("0.0.1")?.increment("preRelease").toString()).toBe("0.0.1-rc.1");
-    expect(new SemVer("0.1.0-rc.1")?.increment("preRelease").toString()).toBe("0.1.0-rc.2");
-    expect(new SemVer("1.0.0+build.3")?.increment("preRelease").toString()).toBe("1.0.0-rc.1");
-    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("preRelease").toString()).toBe("1.0.0-rc.3");
+    expect(new SemVer("0.0.1")?.increment("PRERELEASE").toString()).toBe("0.0.1-rc.1");
+    expect(new SemVer("0.1.0-rc.1")?.increment("PRERELEASE").toString()).toBe("0.1.0-rc.2");
+    expect(new SemVer("1.0.0+build.3")?.increment("PRERELEASE").toString()).toBe("1.0.0-rc.1");
+    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("PRERELEASE").toString()).toBe("1.0.0-rc.3");
   });
 
   test("increment build", () => {
-    expect(new SemVer("0.0.1")?.increment("build").toString()).toBe("0.0.1+build.1");
-    expect(new SemVer("0.1.0-rc.1")?.increment("build").toString()).toBe("0.1.0-rc.1+build.1");
-    expect(new SemVer("1.0.0+build.1")?.increment("build").toString()).toBe("1.0.0+build.2");
-    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("build").toString()).toBe("1.0.0-rc.2+build.2");
+    expect(new SemVer("0.0.1")?.increment("BUILD").toString()).toBe("0.0.1+build.1");
+    expect(new SemVer("0.1.0-rc.1")?.increment("BUILD").toString()).toBe("0.1.0-rc.1+build.1");
+    expect(new SemVer("1.0.0+build.1")?.increment("BUILD").toString()).toBe("1.0.0+build.2");
+    expect(new SemVer("1.0.0-rc.2+build.1")?.increment("BUILD").toString()).toBe("1.0.0-rc.2+build.2");
   });
 
   test("Support prefix", () => {
     expect(
       new SemVer("v0.0.0", "v")
-        ?.increment("major")
-        .increment("minor")
-        .increment("patch")
-        .increment("preRelease")
-        .increment("build")
+        ?.increment("MAJOR")
+        .increment("MINOR")
+        .increment("PATCH")
+        .increment("PRERELEASE")
+        .increment("BUILD")
         .toString()
     ).toBe("v1.1.1-rc.1+build.1");
     expect(
       new SemVer("v0.0.0", "v")
-        ?.increment("build")
-        .increment("preRelease")
-        .increment("patch")
-        .increment("minor")
-        .increment("major")
+        ?.increment("BUILD")
+        .increment("PRERELEASE")
+        .increment("PATCH")
+        .increment("MINOR")
+        .increment("MAJOR")
         .toString()
     ).toBe("v1.0.0");
   });

@@ -34,7 +34,7 @@ type CalVerFormat = "YYYY" | "YY" | "0Y" | "MM" | "0M" | "WW" | "0W" | "DD" | "0
  * @member micro Increments the micro version
  * @member modifier Increments the modifier
  */
-type CalVerIncrement = "CALENDAR" | "MAJOR" | "MINOR" | "MICRO" | "MODIFIER";
+export type CalVerIncrement = "CALENDAR" | "MAJOR" | "MINOR" | "MICRO" | "MODIFIER";
 
 /**
  * CalVer format
@@ -59,6 +59,7 @@ export interface IFormat {
  * @member micro Micro version
  * @member modifier Modifier
  * @member prefix Prefix
+ * @internal
  */
 export interface ICalVer {
   prefix?: string;
