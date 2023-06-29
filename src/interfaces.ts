@@ -12,7 +12,6 @@ SPDX-License-Identifier: GPL-3.0-or-later
  * @member isLessThan Checks if the current version is less than the other version
  * @member compareTo Compares the current version to the other version
  * @template T Version type
- * @internal
  */
 export interface IComparable<T> {
   /**

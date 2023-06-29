@@ -6,4 +6,4 @@ SPDX-License-Identifier: GPL-3.0-or-later
 
 export { ISemVer, SemVer, SemVerIncrement } from "./semver";
 export { ICalVer, CalVer, CalVerIncrement } from "./calver";
-export { IVersion } from "./interfaces";
+export { IComparable, IVersion } from "./interfaces";
