@@ -59,7 +59,6 @@ export interface IFormat {
  * @member micro Micro version
  * @member modifier Modifier
  * @member prefix Prefix
- * @internal
  */
 export interface ICalVer {
   prefix?: string;

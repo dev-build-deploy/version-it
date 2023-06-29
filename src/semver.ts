@@ -33,7 +33,6 @@ export type SemVerIncrement = "MAJOR" | "MINOR" | "PATCH" | "PRERELEASE" | "BUIL
  * @member patch Patch version
  * @member preRelease Pre-release identifier
  * @member build Build identifier
- * @internal
  */
 export interface ISemVer {
   prefix?: string;
