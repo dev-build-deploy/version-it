@@ -31,8 +31,8 @@ jobs:
         with:
           token: ${{ github.token }}
 
-  release-action:
-    name: Release GitHub Action
+  publish-package:
+    name: Publish NPM Package
     runs-on: ubuntu-latest
     needs: release-me
     if: needs.release-me.outputs.created
@@ -53,9 +53,6 @@ jobs:
 
       - name: Update version
         run: npm --no-git-tag-version version ${{ fromJSON(needs.release-me.outputs.release).tag_name }}
-
-      - name: Build package
-        run: npm run build
 
       - name: Publish package
         run: npm publish
