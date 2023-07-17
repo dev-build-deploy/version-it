@@ -12,7 +12,7 @@
     "format": "prettier --write **/*.ts && prettier --write **/*.ts"
   },
   "author": "Kevin de Jong",
-  "license": "GPL-3.0-or-later",
+  "license": "MIT",
   "keywords": [
     "Versioning",
     "SemVer",
