@@ -1,7 +1,6 @@
 <!-- 
 SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
-
-SPDX-License-Identifier: GPL-3.0-or-later
+SPDX-License-Identifier: MIT
 -->
 
 # VersionIt - Version Management Library
@@ -141,7 +140,7 @@ For more, check out the [Contributing Guide](CONTRIBUTING.md).
 
 ## License
 
-- [GPL-3.0-or-later AND CC0-1.0](LICENSE) © 2023 Kevin de Jong \<monkaii@hotmail.com\>
+- [MIT](./LICENSES/MIT.txt) © 2023 Kevin de Jong \<monkaii@hotmail.com\>
 
 [SemVer 2.0.0]: https://semver.org
 [CalVer]: https://calver.org

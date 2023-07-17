@@ -1,7 +1,7 @@
 Format: https://www.debian.org/doc/packaging-manuals/copyright-format/1.0/
-Upstream-Name: comment-it
+Upstream-Name: version-it
 Upstream-Contact: Kevin de Jong <monkaii@hotmail.com>
-Source: https://github.com/dev-build-deploy/comment-it
+Source: https://github.com/dev-build-deploy/version-it
 
 Files: tsconfig*.json
 Copyright: 2023 Kevin de Jong <monkaii@hotmail.com>
