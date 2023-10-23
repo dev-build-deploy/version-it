@@ -42,7 +42,7 @@ jobs:
         with:
           ref: ${{ fromJSON(needs.release-me.outputs.release).tag_name }}
 
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: '16.x'
           registry-url: 'https://registry.npmjs.org'
