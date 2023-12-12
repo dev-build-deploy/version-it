@@ -26,7 +26,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Run CommitMe
-        uses: dev-build-deploy/commit-me@v0
+        uses: dev-build-deploy/commit-me@v1
         with:
           token: ${{ github.token }}
           include-commits: true
