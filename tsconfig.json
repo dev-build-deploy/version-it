@@ -1,11 +1,8 @@
 {
+  "extends": "@tsconfig/node20/tsconfig.json",
   "compilerOptions": {
-    "target": "ES2019",
-    "module": "commonjs",
     "declaration": true,
     "outDir": "./lib",
-    "strict": true,
-    "esModuleInterop": true,
     "stripInternal": true,
   },
   "include": ["src", "test/*"],
