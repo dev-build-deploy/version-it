@@ -150,7 +150,7 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
    * @param format CalVer format to use
    * @returns Formatted value
    */
-  private formatVersionCore(value: number, format: CalVerFormat) {
+  private formatVersionCore(value: number, format: CalVerFormat): string {
     if (["MAJOR", "MINOR", "MICRO"].includes(format)) return value.toString();
     if (format === "YYYY") return value.toString().padStart(4, "0");
     if (format === "0Y")

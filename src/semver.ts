@@ -4,6 +4,7 @@ SPDX-License-Identifier: MIT
 */
 
 import assert from "assert";
+
 import { IVersion } from "./interfaces";
 import { getKeyValuePair } from "./utils";
 
