@@ -217,7 +217,7 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
       ],
     ];
 
-    const getIndex = (item: ISemVer) =>
+    const getIndex = (item: ISemVer): 0 | 1 | 2 | 3 =>
       !item.preRelease && !item.build ? 0 : item.preRelease && !item.build ? 1 : !item.preRelease && item.build ? 2 : 3;
 
     return mapping[getIndex(this)][getIndex(other)];
