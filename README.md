@@ -11,7 +11,7 @@ Lightweight Version Management library for managing [Semantic Versioning](#seman
 
 * Simple to use
 * Supports [Semantic Versioning](#semantic-versioning)
-  * Extended with key-value pair support in the `BUILD` and `PRERELEASE` identifier (e.g. `0.1.0-rc.1 < 0.1.0-rc.2`, `0.2.3-rc.3+build.2 < 0.2.3-rc.3+build.3` )
+  * Extended with key-value pair support in the `PRERELEASE` identifier (e.g. `0.1.0-rc.1 < 0.1.0-rc.2` )
 * Supports [Calendar Versioning]
   * Extended with key-value pair support in the `MODIFIER` identifier (e.g. `2023.25.1-build.1`)
 
