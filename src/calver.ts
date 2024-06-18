@@ -1,10 +1,11 @@
 /*
-SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
-SPDX-License-Identifier: MIT
-*/
+ * SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
+ * SPDX-License-Identifier: MIT
+ */
 
 import { IVersion } from "./interfaces";
-import { getISO8601WeekNumber, getKeyValuePair } from "./utils";
+import { getModifiers, Modifier, incrementModifier, compareModifiers, modifiersToString } from "./modifiers";
+import { compareNumbers, getISO8601WeekNumber } from "./utils";
 
 /**
  * CalVer formats
@@ -56,7 +57,7 @@ export interface IFormat {
  * @member major Major version
  * @member minor Minor version
  * @member micro Micro version
- * @member modifier Modifier
+ * @member modifiers Modifiers
  * @member prefix Prefix
  */
 export interface ICalVer {
@@ -64,7 +65,7 @@ export interface ICalVer {
   major: number;
   minor: number;
   micro?: number;
-  modifier?: string;
+  modifiers: Modifier[];
 }
 
 /**
@@ -82,49 +83,50 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
   major: number;
   minor: number;
   micro?: number;
-  modifier?: string;
+  modifiers: Modifier[];
   format: IFormat;
 
-  constructor(format: string | IFormat, version?: string | Partial<ICalVer>, prefix?: string) {
+  constructor(format: string | IFormat, version?: Partial<ICalVer>, prefix?: string) {
     this.format = typeof format === "string" ? formatFromString(format) : format;
-
-    if (typeof version === "string") {
-      if (prefix !== undefined) {
-        if (!version.startsWith(prefix)) throw new Error("Incorrect CalVer, missing prefix");
-        version = version.substring(prefix.length);
-      }
-
-      const groups = this.format.regex.exec(version)?.groups;
-      if (groups === undefined) {
-        throw new Error("Could not parse CalVer");
-      }
-
-      this.prefix = prefix;
-      this.major = parseInt(groups.major);
-      this.minor = parseInt(groups.minor);
-      this.micro = parseInt(groups.micro);
-      this.modifier = groups.modifier;
-    } else {
-      this.prefix = version?.prefix ?? prefix;
-      this.major = version?.major ?? 0;
-      this.minor = version?.minor ?? 0;
-      this.micro = version?.micro ?? (this.format.micro ? 0 : undefined);
-      this.modifier = version?.modifier ?? undefined;
-    }
+    this.prefix = version?.prefix ?? prefix;
+    this.major = version?.major ?? 0;
+    this.minor = version?.minor ?? 0;
+    this.micro = version?.micro ?? (this.format.micro ? 0 : undefined);
+    this.modifiers = version?.modifiers ?? [];
   }
 
   /**
-   * Increments the modifier (in format "key.value") by 1.
-   * If no modifier is available, it will return "build.1"
-   * @returns Incremented modifier
+   * Creates a CalVer object from a string
+   * @param format CalVer formatting
+   * @param versin Version string
+   * @param prefix Prefix associated with the version
+   * @returns CalVer
+   * @throws Error when the version string is not compatible with Calendar Versioning
    */
-  private incrementModifier(): string | undefined {
-    if (this.modifier === undefined) return "build.1";
+  static fromString(format: string | IFormat, version: string, prefix?: string): CalVer {
+    format = typeof format === "string" ? formatFromString(format) : format;
 
-    const keyValue = getKeyValuePair(this.modifier);
-    if (keyValue === undefined) throw new Error("Cannot increment modifiers without a key/value pair");
+    if (prefix !== undefined) {
+      if (!version.startsWith(prefix)) throw new Error("Incorrect CalVer, missing prefix");
+      version = version.substring(prefix.length);
+    }
 
-    return `${keyValue.key}.${keyValue.value + 1}`;
+    const groups = format.regex.exec(version)?.groups;
+    if (groups === undefined) {
+      throw new Error("Could not parse CalVer");
+    }
+
+    return new CalVer(
+      format,
+      {
+        prefix: prefix,
+        major: parseInt(groups.major),
+        minor: parseInt(groups.minor),
+        micro: parseInt(groups.micro),
+        modifiers: getModifiers(groups.modifier),
+      },
+      prefix
+    );
   }
 
   /**
@@ -182,22 +184,23 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
     if (this.micro !== undefined && this.format.micro !== undefined)
       version += `.${this.formatVersionCore(this.micro, this.format.micro)}`;
 
-    if (this.modifier !== undefined) version += `-${this.modifier}`;
+    version += modifiersToString(this.modifiers);
 
     return version;
   }
 
   /**
    * Increments the CalVer by the provided type;
-   *   - "calendar": Increments the calendar (i.e. YYYY, MM, WW, DD)
-   *   - "major": Increments the major version
-   *   - "minor": Increments the minor version
-   *   - "micro": Increments the micro version
-   *   - "modifier": Increments the modifier
+   *   - "CALENDAR": Increments the calendar (i.e. YYYY, MM, WW, DD)
+   *   - "MAJOR": Increments the major version
+   *   - "MINOR": Increments the minor version
+   *   - "MICRO": Increments the micro version
+   *   - "MODIFIER": Increments the modifier
    * @param type Type of increment
+   * @param modifier Modifier to increment
    * @returns Incremented CalVer
    */
-  increment(type: CalVerIncrement): CalVer {
+  increment(type: CalVerIncrement, modifier?: string): CalVer {
     switch (type) {
       case "CALENDAR": {
         // Increment the calendar only, this allows us to validate whether the calendar has changed
@@ -206,11 +209,11 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
           major: this.updateCalendar(this.format.major) ?? this.major,
           minor: this.updateCalendar(this.format.minor) ?? this.minor,
           micro: this.updateCalendar(this.format.micro) ?? this.micro,
-          modifier: this.modifier,
+          modifiers: this.modifiers,
         });
 
-        // Increment the modifier if the calendar has not changed
-        if (newVersion.isEqualTo(this)) return new CalVer(this.format, { ...this, modifier: this.incrementModifier() });
+        // Return current version in case the calendar has not changed
+        if (newVersion.isEqualTo(this)) return this;
 
         // If the calendar items are updated, reset MAJOR, MINOR, MICRO...
         for (const subtype of ["major", "minor", "micro"] as (keyof ICalVer)[]) {
@@ -221,8 +224,8 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
 
           newVersion[filter[0].toLowerCase() as "major" | "minor" | "micro"] = 0;
         }
-        // ... and MODIFIER
-        newVersion.modifier = undefined;
+        // ... and reset the MODIFIERS
+        newVersion.modifiers = [];
 
         return newVersion;
       }
@@ -234,20 +237,23 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
         if (filter.length !== 1) throw new Error(`Unable to increment ${type} version as it is not part of the format`);
 
         const item = filter[0].toLowerCase() as "major" | "minor" | "micro";
-        if (item === "major") return new CalVer(this.format, { major: this.major + 1, modifier: undefined });
+        if (item === "major") return new CalVer(this.format, { major: this.major + 1, modifiers: [] });
         if (item === "minor")
-          return new CalVer(this.format, { major: this.major, minor: this.minor + 1, modifier: undefined });
+          return new CalVer(this.format, { major: this.major, minor: this.minor + 1, modifiers: [] });
         if (item === "micro")
           return new CalVer(this.format, {
             major: this.major,
             minor: this.minor,
             micro: (this.micro ?? 0) + 1,
-            modifier: undefined,
+            modifiers: [],
           });
         throw new Error("Unknown increment type.");
       }
       case "MODIFIER":
-        return new CalVer(this.format, { ...this, modifier: this.incrementModifier() });
+        return new CalVer(this.format, {
+          ...this,
+          modifiers: incrementModifier(this.modifiers, modifier === undefined ? "rc" : modifier),
+        });
     }
   }
 
@@ -292,33 +298,18 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
   compareTo(other: CalVer): number {
     if (!this.isFormatIdentical(other.format)) throw new Error("Unable to compare CalVer with different formats");
 
-    if (this.major > other.major) return 1;
-    if (this.major < other.major) return -1;
+    const majorCmp = compareNumbers(this.major, other.major);
+    if (majorCmp !== 0) return majorCmp;
 
-    if (this.minor > other.minor) return 1;
-    if (this.minor < other.minor) return -1;
+    const minorCmp = compareNumbers(this.minor, other.minor);
+    if (minorCmp !== 0) return minorCmp;
 
     if (this.micro !== undefined && other.micro !== undefined) {
-      if (this.micro > other.micro) return 1;
-      if (this.micro < other.micro) return -1;
+      const microCmp = compareNumbers(this.micro, other.micro);
+      if (microCmp !== 0) return microCmp;
     }
 
-    if (this.modifier !== undefined && other.modifier === undefined) return 1;
-    if (this.modifier === undefined && other.modifier !== undefined) return -1;
-
-    if (this.modifier !== undefined && other.modifier !== undefined) {
-      const aModifier = getKeyValuePair(this.modifier);
-      const bModifier = getKeyValuePair(other.modifier);
-      if (aModifier !== undefined && bModifier !== undefined) {
-        if (aModifier.key !== bModifier.key) return aModifier.key.localeCompare(bModifier.key);
-        if (aModifier.value > bModifier.value) return 1;
-        if (aModifier.value < bModifier.value) return -1;
-      } else {
-        return this.modifier.localeCompare(other.modifier);
-      }
-    }
-
-    return 0;
+    return compareModifiers(this.modifiers, other.modifiers);
   }
 }
 

@@ -24,17 +24,18 @@ Lightweight Version Management library for managing [Semantic Versioning](#seman
 import { SemVer } from "@dev-build-deploy/version-it";
 
 // Create from string
-const currentVersion = new SemVer("0.1.2-alpha.4");
-
-// Create from interface
-const previousVersion = new SemVer({
-  minor: 1,
-  patch: 2,
-  preRelease: "alpha.3"
-});
+const currentVersion = SemVer.fromString("0.1.2");
 
 // Increment the version
-const newVersion = currentVersion.increment("PRERELEASE");
+const alphaVersion = currentVersion.increment("PRERELEASE", "alpha"); // => 0.1.2-alpha.1
+const majorVersion = currentVersion.increment("MAJOR"); // => 1.0.0
+
+// Create from interface
+const constructed = new SemVer({
+  minor: 1,
+  patch: 2,
+  preReleases: [{ identifier: "alpha", value: 3 }]
+});
 ```
 
 ### Incrementing the version
@@ -46,12 +47,12 @@ The following increment types can be applied when using `.increment(...)`:
 | `MAJOR` | Increments the `MAJOR` version core |
 | `MINOR` | Increments the `MINOR` version core |
 | `PATCH` | Increments the `PATCH` version core |
-| `PRERELEASE` | Increments the `PRERELEASE` or adds `-rc.1` in case no `PRERELEASE` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `-alpha.1`, `-rc.7`) |
-| `BUILD` | Increments the `BUILD` or adds `+build.1` in case no `BUILD` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `+build.1`, `+attempt.3`) |
+| `PRERELEASE` | Increments the `PRERELEASE` or adds `-rc.1` in case no `PRERELEASE` is present on the version to be incremented.<br>You can specify the pre-release element to increment by providing the optional `modifier` parameter<br><br>This will manage pre-release identifiers a key-value pair (e.g. `-alpha.1`, `-rc.7`) |
 
 ## Calendar Versioning
 
-> :bulb: Please refer to the [CalVer] specification for information about Calendar Versioning.
+> [!INFO]
+> Please refer to the [CalVer] specification for information about Calendar Versioning.
 
 ```ts
 import { CalVer } from "@dev-build-deploy/version-it";
@@ -62,17 +63,17 @@ const calverFormat = "YYYY.0M.MICRO";
 const currentVersion = new CalVer(calverFormat, "2023.01.12-alpha.2");
 
 // Create from interface
-const previousVersion = new CalVer(
+const constructed = new CalVer(
   calverFormat, {
     major: 2023,
     minor: 1,
     micro: 12,
-    modified: "alpha.1"
+    modifiers: [{ identifier: "alpha", version: 1 }]
   }
 );
 
 // Update the calendar related version (e.g. YYYY, MM, WW, DD)
-const newVersion = currentVersion.increment("CALENDAR");
+const newVersion = currentVersion.increment("CALENDAR"); // => 2024.0.0
 ```
 
 ### CalVer Formatting
@@ -98,6 +99,9 @@ Formatting is provided as a string, where each version core (`MAJOR`, `MINOR`, `
 
 ### Incrementing the version
 
+> [!WARNING]
+> The `MODIFIER` is using the same precedence rules as "Pre-releases" in the [SemVer] specification.
+
 The following increment types can be applied when using `.increment(...)`:
 
 | Type | Description |
@@ -106,7 +110,7 @@ The following increment types can be applied when using `.increment(...)`:
 | `MAJOR` | Increments (+1) the version associated with `MAJOR` formatting |
 | `MINOR` | Increments (+1) the version associated with `MINOR` formatting |
 | `MICRO` | Increments (+1) the version associated with `MICRO` formatting |
-| `MODIFIER` | Increments the `MODIFIER` or adds `build.1` in case no `MODIFIER` is present on the version to be incremented.<br><br>Requires a key-value pair (e.g. `alpha.1`, `build.7`)|
+| `MODIFIER` | Increments the `MODIFIER` or adds `-rc.1` in case no `MODIFIER` is present on the version to be incremented.<br>You can specify the modifier element to increment by providing the optional `modifier` parameter<br><br>This will manage pre-release identifiers a key-value pair (e.g. `-alpha.1`, `-rc.7`)|
 
 ## Comparing and sorting
 
@@ -129,7 +133,6 @@ const sortedVersions = unsortedVersions.sort((a, b) => a.compareTo(b));
 if (newVersion.isGreaterThan(previousVersion)) {
   // Hurray..!
 }
-
 ```
 
 ## Contributing
