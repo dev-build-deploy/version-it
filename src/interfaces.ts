@@ -1,7 +1,7 @@
 /*
-SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
-SPDX-License-Identifier: MIT
-*/
+ * SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
+ * SPDX-License-Identifier: MIT
+ */
 
 /**
  * Comparable interface
@@ -61,6 +61,7 @@ export interface IVersion<T, Y> extends IComparable<T> {
   /**
    * Increments the version by the provided type
    * @param type Type of increment
+   * @param modifier Modifier to increment
    */
-  increment(type: Y): T;
+  increment(type: Y, modifier?: string): T;
 }

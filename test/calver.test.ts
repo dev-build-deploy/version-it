@@ -1,7 +1,7 @@
-/* 
-SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
-SPDX-License-Identifier: MIT
-*/
+/*
+ * SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
+ * SPDX-License-Identifier: MIT
+ */
 
 import * as calver from "../src/calver";
 
@@ -98,7 +98,7 @@ describe("String to CalVer", () => {
     ];
 
     for (const [version, format] of versions) {
-      expect(new calver.CalVer(format, version).toString()).toBe(version);
+      expect(calver.CalVer.fromString(format, version).toString()).toBe(version);
     }
   });
 
@@ -116,12 +116,12 @@ describe("String to CalVer", () => {
       ["07.1", "0D.MINOR", "13.0"],
       ["07.1.3", "0D.MAJOR.MINOR", "13.0.0"],
       // Equal versions
-      ["2023.1", "YYYY.MINOR", "2023.1-build.1"],
-      ["2023.1-build.1", "YYYY.MINOR", "2023.1-build.2"],
+      ["2023.1", "YYYY.MINOR", "2023.1"],
+      ["2023.1-build.1", "YYYY.MINOR", "2023.1-build.1"],
     ];
 
     for (const [version, format, expectations] of versions) {
-      expect(new calver.CalVer(format, version).increment("CALENDAR").toString()).toBe(expectations);
+      expect(calver.CalVer.fromString(format, version).increment("CALENDAR").toString()).toBe(expectations);
     }
   });
 
@@ -131,6 +131,8 @@ describe("String to CalVer", () => {
       ["2022.1", "YYYY.MAJOR", "2022.2"],
       ["22.1", "YY.MAJOR", "22.2"],
       ["09.1.3", "0D.MAJOR.MINOR", "09.2.0"],
+      // Increment pre-release modifier
+      ["10.2.4-alpha.1", "DD.MAJOR.MINOR", "10.3.0"],
       // Incorrect increments
       ["2022.1", "YYYY.MINOR", ""],
       ["22.1", "YY.DD", ""],
@@ -141,9 +143,9 @@ describe("String to CalVer", () => {
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(new calver.CalVer(format, version).increment("MAJOR").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version).increment("MAJOR").toString()).toBe(expectations);
       } else {
-        expect(() => new calver.CalVer(format, version).increment("MAJOR")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version).increment("MAJOR")).toThrow();
       }
     }
   });
@@ -153,6 +155,8 @@ describe("String to CalVer", () => {
       // New versions
       ["2022.1.2", "YYYY.MAJOR.MINOR", "2022.1.3"],
       ["22.1", "YY.MINOR", "22.2"],
+      // Pre-release modifier
+      ["22.1-alpha.1", "YY.MINOR", "22.2"],
       // Incorrect increments
       ["2022.1", "YYYY.MAJOR", ""],
       ["22.1", "YY.DD", ""],
@@ -163,18 +167,20 @@ describe("String to CalVer", () => {
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(new calver.CalVer(format, version).increment("MINOR").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version).increment("MINOR").toString()).toBe(expectations);
       } else {
-        expect(() => new calver.CalVer(format, version).increment("MINOR")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version).increment("MINOR")).toThrow();
       }
     }
   });
 
-  test("Update Minor", () => {
+  test("Update Micro", () => {
     const versions = [
       // New versions
       ["2022.1.2", "YYYY.MINOR.MICRO", "2022.1.3"],
       ["22.1", "YY.MICRO", "22.2"],
+      // Pre-release modifier
+      ["22.1-alpha.1", "YY.MICRO", "22.2"],
       // Incorrect increments
       ["2022.1", "YYYY.MAJOR", ""],
       ["22.1", "YY.DD", ""],
@@ -185,9 +191,9 @@ describe("String to CalVer", () => {
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(new calver.CalVer(format, version).increment("MICRO").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version).increment("MICRO").toString()).toBe(expectations);
       } else {
-        expect(() => new calver.CalVer(format, version).increment("MICRO")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version).increment("MICRO")).toThrow();
       }
     }
   });
@@ -198,15 +204,15 @@ describe("String to CalVer", () => {
       ["2022.1.2", "YYYY.MAJOR.MINOR", "2022.1.2-build.1"],
       ["22.1-build.3", "YY.MINOR", "22.1-build.4"],
       // Incorrect increments
-      ["2022.1-alpha", "YYYY.MAJOR", ""],
-      ["22.1-alpha1", "YY.DD", ""],
+      ["2022.1-alpha", "YY.MAJOR", ""],
+      ["22.1-alpha1", "YYYY.DD", ""],
     ];
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(new calver.CalVer(format, version).increment("MODIFIER").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version).increment("MODIFIER", "build").toString()).toBe(expectations);
       } else {
-        expect(() => new calver.CalVer(format, version).increment("MODIFIER")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version).increment("MODIFIER")).toThrow();
       }
     }
   });
@@ -231,7 +237,7 @@ describe("Comparators", () => {
       ["MAJOR.MINOR.MICRO", "2022.2.2", "2023.2.2", "-1"],
       ["MAJOR.MINOR.MICRO", "2024.1.1", "2023.2.2", "1"],
       // Modifiers
-      ["YYYY.MINOR", "2023.1", "2023.1-build.1", "-1"],
+      ["YYYY.MINOR", "2023.1", "2023.1-build.1", "1"],
       ["YYYY.MINOR", "2023.2", "2023.1-build.1", "1"],
       ["YYYY.MINOR", "2023.1-build.1", "2023.1-build.1", "0"],
       ["YYYY.MINOR", "2023.1-build.2", "2023.1-build.1", "1"],
@@ -249,8 +255,8 @@ describe("Comparators", () => {
     ];
 
     for (const [format, a, b, expectations] of versions) {
-      const aC = new calver.CalVer(format, a);
-      const bC = new calver.CalVer(format, b);
+      const aC = calver.CalVer.fromString(format, a);
+      const bC = calver.CalVer.fromString(format, b);
       expect(aC.compareTo(bC)).toBe(parseInt(expectations));
       expect(aC.isEqualTo(bC)).toBe(expectations === "0");
       expect(aC.isGreaterThan(bC)).toBe(expectations === "1");

@@ -1,21 +1,7 @@
 /*
-SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
-SPDX-License-Identifier: MIT
-*/
-
-/**
- * Returns a key-value pair from the provided identifier (e.g. alpha.1 => { key: "alpha.", value: 1 })
- * @param identifier Identifier to parse (e.g. alpha.1)
- * @returns Identifier value (e.g. 1)
- * @internal
+ * SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
+ * SPDX-License-Identifier: MIT
  */
-export function getKeyValuePair(value?: string): { key: string; value: number } | undefined {
-  const kvpRegex = /^([a-zA-Z-]+)[.]([0-9]+)$/;
-  const match = kvpRegex.exec(value ?? "");
-  if (match === null) return;
-
-  return { key: match[1], value: parseInt(match[2]) };
-}
 
 /**
  * Returns the week number of the current date (ISO 8601)
@@ -32,4 +18,11 @@ export function getISO8601WeekNumber(): number {
     date.setMonth(0, 1 + ((4 - date.getDay() + 7) % 7));
   }
   return 1 + Math.ceil((firstThursday - date.valueOf()) / 604800000);
+}
+
+export function compareNumbers(a: number, b: number): number {
+  if (a > b) return 1;
+  else if (a < b) return -1;
+
+  return 0;
 }

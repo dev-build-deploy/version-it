@@ -1,17 +1,14 @@
 /*
-SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
-SPDX-License-Identifier: MIT
-*/
-
-import assert from "assert";
+ * SPDX-FileCopyrightText: 2023 Kevin de Jong <monkaii@hotmail.com>
+ * SPDX-License-Identifier: MIT
+ */
 
 import { IVersion } from "./interfaces";
-import { getKeyValuePair } from "./utils";
+import { compareModifiers, getModifiers, incrementModifier, Modifier, modifiersToString } from "./modifiers";
 
 const SEMVER_REGEX =
-  /^(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)(-(?<preRelease>[a-zA-Z0-9.-]+))?(\+(?<build>[a-zA-Z0-9.-]+))?$/;
+  /^(?<major>0|[1-9]\d*)\.(?<minor>0|[1-9]\d*)\.(?<patch>0|[1-9]\d*)(?:-(?<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/;
 
-type SemVerIdentifier = "preRelease" | "build";
 type SemVerVersionCore = "major" | "minor" | "patch";
 
 /**
@@ -21,9 +18,8 @@ type SemVerVersionCore = "major" | "minor" | "patch";
  * @member minor Minor version
  * @member patch Patch version
  * @member preRelease Pre-release identifier
- * @member build Build identifier
  */
-export type SemVerIncrement = "MAJOR" | "MINOR" | "PATCH" | "PRERELEASE" | "BUILD";
+export type SemVerIncrement = "MAJOR" | "MINOR" | "PATCH" | "PRERELEASE";
 
 /**
  * A simple SemVer implementation
@@ -39,7 +35,7 @@ export interface ISemVer {
   major: number;
   minor: number;
   patch: number;
-  preRelease?: string;
+  preReleases: Modifier[];
   build?: string;
 }
 
@@ -59,50 +55,46 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
   major: number;
   minor: number;
   patch: number;
-  preRelease?: string;
+  preReleases: Modifier[];
   build?: string;
 
-  constructor(version?: string | Partial<ISemVer>, prefix?: string) {
-    if (typeof version === "string") {
-      // Handle prefix
-      if (prefix !== undefined) {
-        if (!version.startsWith(prefix)) throw new Error("Incorrect SemVer, missing prefix");
-        version = version.substring(prefix.length);
-      }
-
-      // SemVer regex
-      const groups = SEMVER_REGEX.exec(version)?.groups;
-      if (groups === undefined) throw new Error("Could not parse SemVer");
-
-      this.prefix = prefix;
-      this.major = parseInt(groups.major);
-      this.minor = parseInt(groups.minor);
-      this.patch = parseInt(groups.patch);
-      this.preRelease = groups.preRelease;
-      this.build = groups.build;
-    } else {
-      this.prefix = version?.prefix ?? prefix;
-      this.major = version?.major ?? 0;
-      this.minor = version?.minor ?? 0;
-      this.patch = version?.patch ?? 0;
-      this.preRelease = version?.preRelease;
-      this.build = version?.build;
-    }
+  constructor(version?: Partial<ISemVer>) {
+    this.prefix = version?.prefix;
+    this.major = version?.major ?? 0;
+    this.minor = version?.minor ?? 0;
+    this.patch = version?.patch ?? 0;
+    this.preReleases = version?.preReleases ?? [];
+    this.build = version?.build;
   }
 
   /**
-   * Increments the value of the SemVer identifier
-   * @param identifier Identifier to increment
-   * @returns Incremented identifier, undefined when identifier does not exist
+   * Creates a SemVer object from a string
+   * @param version Version string
+   * @param prefix Prefix associated with the version
+   * @returns SemVer
+   * @throws Error when the version string is not compatible with Semantic Versioning
    */
-  private incrementIdentifier(identifier: SemVerIdentifier): string | undefined {
-    if (this[identifier] === undefined) return;
+  static fromString(version: string, prefix?: string): SemVer {
+    // Handle prefix
+    if (prefix !== undefined) {
+      if (!version.startsWith(prefix)) throw new Error("Incorrect SemVer, missing prefix");
+      version = version.substring(prefix.length);
+    }
 
-    const keyValuePair = getKeyValuePair(this[identifier]);
-    if (keyValuePair?.key === undefined || keyValuePair?.value === undefined)
-      throw new Error(`Unable to bump ${identifier}`);
+    // SemVer regex
+    const groups = SEMVER_REGEX.exec(version)?.groups;
+    if (groups === undefined) throw new Error("Could not parse SemVer");
 
-    return `${keyValuePair.key}.${keyValuePair.value + 1}`;
+    const semver: ISemVer = {
+      prefix,
+      major: parseInt(groups.major),
+      minor: parseInt(groups.minor),
+      patch: parseInt(groups.patch),
+      preReleases: getModifiers(groups.prerelease),
+      build: groups.buildmetadata,
+    };
+
+    return new SemVer(semver);
   }
 
   /**
@@ -111,23 +103,21 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
    * - minor: 1.0.0 => 1.1.0
    * - patch: 1.0.0 => 1.0.1
    * - preRelease: 1.0.0 => 1.0.0-rc.1
-   * - build: 1.0.0 => 1.0.0+build.1
    *
-   * Incrementing a type will reset any lesser significant types (e.g. incrementing minor will reset patch, preRelease, and build).
-   *   order of significance: major > minor > patch > preRelease > build
+   * Incrementing a type will reset any lesser significant types (e.g. incrementing minor will reset patch, preRelease).
+   *   order of significance: major > minor > patch > preRelease
    *
    * @param type Type of increment
+   * @param modifier Modifier to increment
    * @returns Incremented SemVer
    */
-  increment(type: SemVerIncrement): SemVer {
+  increment(type: SemVerIncrement, modifier?: string): SemVer {
     switch (type) {
       case "PRERELEASE":
-        return new SemVer({ ...this, preRelease: this.incrementIdentifier("preRelease") ?? "rc.1", build: undefined });
-      case "BUILD":
         return new SemVer({
           ...this,
-          preRelease: this.preRelease,
-          build: this.incrementIdentifier("build") ?? "build.1",
+          preReleases: incrementModifier(this.preReleases, modifier === undefined ? "rc" : modifier),
+          build: undefined,
         });
       case "MAJOR":
         return new SemVer({ prefix: this.prefix, major: this.major + 1 });
@@ -136,26 +126,6 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
       case "PATCH":
         return new SemVer({ prefix: this.prefix, major: this.major, minor: this.minor, patch: this.patch + 1 });
     }
-  }
-
-  compareIdentifier(a?: string, b?: string): number {
-    if (a === b) return 0;
-    if (!a) return -1;
-    if (!b) return 1;
-
-    const aId = getKeyValuePair(a);
-    const bId = getKeyValuePair(b);
-
-    if (!aId) return bId ? -1 : a.localeCompare(b);
-    if (!bId) return 1;
-
-    if (aId.key !== bId.key) return a.localeCompare(b);
-    if (aId.value !== bId.value) {
-      assert(aId.value !== undefined && bId.value !== undefined);
-      return aId.value > bId.value ? 1 : -1;
-    }
-
-    return 0;
   }
 
   /**
@@ -184,53 +154,39 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
   compareTo(other: ISemVer): number {
     const keys: SemVerVersionCore[] = ["major", "minor", "patch"];
 
+    // 0.0.1 < 0.1.0 < 1.0.0
     for (const key of keys) {
       if (this[key] !== other[key]) {
         return this[key] > other[key] ? 1 : -1;
       }
     }
 
-    // undefined, prerelease, build, prerelease + build
-    // prerelease
-    // build
-    // prerelease + build
-    const mapping = [
-      [0, 1, -1, 1],
-      [
-        -1,
-        this.compareIdentifier(this.preRelease, other.preRelease),
-        -1,
-        this.compareIdentifier(this.preRelease, other.preRelease) === 0
-          ? this.compareIdentifier(this.build, other.build)
-          : this.compareIdentifier(this.preRelease, other.preRelease),
-      ],
-      [1, 1, this.compareIdentifier(this.build, other.build), 1],
-      [
-        -1,
-        this.compareIdentifier(this.preRelease, other.preRelease) === 0
-          ? 1
-          : this.compareIdentifier(this.preRelease, other.preRelease),
-        -1,
-        this.compareIdentifier(this.preRelease, other.preRelease) === 0
-          ? this.compareIdentifier(this.build, other.build)
-          : this.compareIdentifier(this.preRelease, other.preRelease),
-      ],
-    ];
-
-    const getIndex = (item: ISemVer): 0 | 1 | 2 | 3 =>
-      !item.preRelease && !item.build ? 0 : item.preRelease && !item.build ? 1 : !item.preRelease && item.build ? 2 : 3;
-
-    return mapping[getIndex(this)][getIndex(other)];
+    return compareModifiers(this.preReleases, other.preReleases);
   }
 
+  /**
+   * Compares to Semantic Versions and returns true if they are equal
+   * @param other Other Semantic Version
+   * @returns True if the versions are equal, false otherwise
+   */
   isEqualTo(other: ISemVer): boolean {
     return this.compareTo(other) === 0;
   }
 
+  /**
+   * Compares to Semantic Versions and returns true if the current version is greater than the other version
+   * @param other Other Semantic Version
+   * @returns True if the current version is greater than the other version, false otherwise
+   */
   isGreaterThan(other: ISemVer): boolean {
     return this.compareTo(other) === 1;
   }
 
+  /**
+   * Compares to Semantic Versions and returns true if the current version is less than the other version
+   * @param other Other Semantic Version
+   * @returns True if the current version is less than the other version, false otherwise
+   */
   isLessThan(other: ISemVer): boolean {
     return this.compareTo(other) === -1;
   }
@@ -240,8 +196,9 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
    * @returns SemVer as a string
    */
   toString(): string {
-    return `${this.prefix !== undefined ? this.prefix : ""}${this.major}.${this.minor}.${this.patch}${
-      this.preRelease ? "-" + this.preRelease : ""
-    }${this.build ? "+" + this.build : ""}`;
+    const build = this.build ? "+" + this.build : "";
+    const prereleases = modifiersToString(this.preReleases);
+
+    return `${this.prefix || ""}${this.major}.${this.minor}.${this.patch}${prereleases}${build}`;
   }
 }
