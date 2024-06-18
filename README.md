@@ -18,7 +18,8 @@ Lightweight Version Management library for managing [Semantic Versioning](#seman
 
 ## Semantic Versioning
 
-> :bulb: Please refer to the [SemVer 2.0.0] specification for information about Semantic Versioning.
+> [!NOTE]
+> Please refer to the [SemVer 2.0.0] specification for information about Semantic Versioning.
 
 ```typescript
 import { SemVer } from "@dev-build-deploy/version-it";
@@ -51,7 +52,7 @@ The following increment types can be applied when using `.increment(...)`:
 
 ## Calendar Versioning
 
-> [!INFO]
+> [!NOTE]
 > Please refer to the [CalVer] specification for information about Calendar Versioning.
 
 ```ts
@@ -78,7 +79,8 @@ const newVersion = currentVersion.increment("CALENDAR"); // => 2024.0.0
 
 ### CalVer Formatting
 
-> **NOTE**: Wwe only support CalVer formatting with 2 or 3 version cores.
+> [!WARNING]
+> We only support CalVer formatting with 2 or 3 version cores.
 
 Formatting is provided as a string, where each version core (`MAJOR`, `MINOR`, `MICRO`) can be assigned to a specific format:
 
