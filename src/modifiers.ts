@@ -4,7 +4,11 @@
  */
 
 /**
- * @internal
+ * Pre-release modifier
+ * @type Modifier
+ * @member identifier Identifier of the modifier
+ * @member value Value of the modifier
+ * @member length Length of the value
  */
 export type Modifier = { identifier?: string; value: number; length: number };
 
