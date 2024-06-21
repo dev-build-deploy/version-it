@@ -5,4 +5,5 @@
 
 export { ISemVer, SemVer, SemVerIncrement } from "./semver";
 export { ICalVer, CalVer, CalVerIncrement } from "./calver";
+export { Modifier } from "./modifiers";
 export { IComparable, IVersion } from "./interfaces";
