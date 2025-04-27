@@ -32,15 +32,13 @@ export function getModifiers(value?: string): Modifier[] {
         modifiers.push(nextModifier);
       }
       nextModifier = { identifier: element, value: 0, length: 0 };
+    } else if (!nextModifier) {
+      modifiers.push({ identifier: undefined, value: Number(element), length: element.length });
     } else {
-      if (!nextModifier) {
-        modifiers.push({ identifier: undefined, value: Number(element), length: element.length });
-      } else {
-        nextModifier.value = Number(element);
-        nextModifier.length = element.length;
-        modifiers.push(nextModifier);
-        nextModifier = undefined;
-      }
+      nextModifier.value = Number(element);
+      nextModifier.length = element.length;
+      modifiers.push(nextModifier);
+      nextModifier = undefined;
     }
   }
 
@@ -107,7 +105,10 @@ export function compareModifiers(a: Modifier[], b: Modifier[]): number {
 export function modifiersToString(modifiers: Modifier[]): string {
   const elements = modifiers.map(modifier =>
     modifier.identifier
-      ? `${modifier.identifier}${modifier.length > 0 ? "." + modifier.value : ""}`
+      ? (() => {
+          const valuePart = modifier.length > 0 ? "." + modifier.value : "";
+          return `${modifier.identifier}${valuePart}`;
+        })()
       : `${modifier.value}`
   );
 
