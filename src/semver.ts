@@ -116,7 +116,7 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
       case "PRERELEASE":
         return new SemVer({
           ...this,
-          preReleases: incrementModifier(this.preReleases, modifier === undefined ? "rc" : modifier),
+          preReleases: incrementModifier(this.preReleases, modifier ?? "rc"),
           build: undefined,
         });
       case "MAJOR":
@@ -199,6 +199,6 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
     const build = this.build ? "+" + this.build : "";
     const prereleases = modifiersToString(this.preReleases);
 
-    return `${this.prefix || ""}${this.major}.${this.minor}.${this.patch}${prereleases}${build}`;
+    return `${this.prefix ?? ""}${this.major}.${this.minor}.${this.patch}${prereleases}${build}`;
   }
 }
