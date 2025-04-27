@@ -142,8 +142,6 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
     if (format.includes("M")) return new Date().getMonth() + 1;
     if (format.includes("W")) return getISO8601WeekNumber();
     if (format.includes("D")) return new Date().getDate() + 1;
-
-    return;
   }
 
   /**
@@ -252,7 +250,7 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
       case "MODIFIER":
         return new CalVer(this.format, {
           ...this,
-          modifiers: incrementModifier(this.modifiers, modifier === undefined ? "rc" : modifier),
+          modifiers: incrementModifier(this.modifiers, modifier ?? "rc"),
         });
     }
   }
@@ -338,7 +336,7 @@ export function formatFromString(format: string): IFormat {
     else if (elements[key] === "0Y") versions.push(`(?<${key}>\\d{3})`);
     else if (["0M", "0W", "0D"].includes(elements[key])) versions.push(`(?<${key}>\\d{2})`);
     else if (["MM", "WW", "DD"].includes(elements[key])) versions.push(`(?<${key}>\\d{1,2})`);
-    else throw new Error(`Unknown CalVer format element: ${elements}, ${key}, ${elements[key]}`);
+    else throw new Error(`Unknown CalVer format element: ${JSON.stringify(elements)}, ${key}, ${elements[key]}`);
 
     usedElements.push(elements[key]);
   }
