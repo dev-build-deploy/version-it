@@ -4,6 +4,7 @@
     "declaration": true,
     "outDir": "./lib",
     "stripInternal": true,
+    "isolatedModules": true
   },
   "include": ["src", "test/*"],
   "exclude": ["node_modules"]
