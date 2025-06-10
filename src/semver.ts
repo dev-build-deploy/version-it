@@ -71,19 +71,18 @@ export class SemVer implements IVersion<SemVer, SemVerIncrement>, ISemVer {
    * Creates a SemVer object from a string
    * @param version Version string
    * @param prefix Prefix associated with the version
-   * @returns SemVer
-   * @throws Error when the version string is not compatible with Semantic Versioning
+   * @returns SemVer or null if the version string is invalid
    */
-  static fromString(version: string, prefix?: string): SemVer {
+  static fromString(version: string, prefix?: string): SemVer | null {
     // Handle prefix
     if (prefix !== undefined) {
-      if (!version.startsWith(prefix)) throw new Error("Incorrect SemVer, missing prefix");
+      if (!version.startsWith(prefix)) return null;
       version = version.substring(prefix.length);
     }
 
     // SemVer regex
     const groups = SEMVER_REGEX.exec(version)?.groups;
-    if (groups === undefined) throw new Error("Could not parse SemVer");
+    if (groups === undefined) return null;
 
     const semver: ISemVer = {
       prefix,

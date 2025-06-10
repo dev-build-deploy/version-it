@@ -27,36 +27,13 @@ describe("String to SemVer", () => {
   test("Bad Versions", () => {
     const versions = ["0.0.1.1", "0.1.x", "0.1.1?rc.1", "v87", "2023-02-02"];
     versions.forEach(v => {
-      expect(() => {
-        SemVer.fromString(v);
-      }).toThrow();
+      const version = SemVer.fromString(v);
+      expect(version).toBeNull();
     });
   });
 });
 
 describe("Comparators", () => {
-  test("isEqualTo", () => {
-    expect(SemVer.fromString("1.0.0")?.isEqualTo(SemVer.fromString("1.0.0"))).toBe(true);
-    expect(SemVer.fromString("1.0.0-rc.1")?.isEqualTo(SemVer.fromString("1.0.0-rc.1"))).toBe(true);
-    expect(SemVer.fromString("1.0.0-rc.1")?.isEqualTo(SemVer.fromString("1.0.0"))).toBe(false);
-    expect(SemVer.fromString("1.0.1")?.isEqualTo(SemVer.fromString("1.0.0"))).toBe(false);
-    expect(SemVer.fromString("1.0.0-rc.1+build.1")?.isEqualTo(SemVer.fromString("1.0.0-rc.1"))).toBe(true);
-  });
-
-  test("isGreaterThan", () => {
-    expect(SemVer.fromString("1.0.0")?.isGreaterThan(SemVer.fromString("1.0.0"))).toBe(false);
-    expect(SemVer.fromString("1.0.0")?.isGreaterThan(SemVer.fromString("1.0.0-rc.1"))).toBe(true);
-    expect(SemVer.fromString("1.0.0-rc.1")?.isGreaterThan(SemVer.fromString("1.0.0-rc.2"))).toBe(false);
-    expect(SemVer.fromString("1.0.0-rc.1+build.1")?.isGreaterThan(SemVer.fromString("1.0.0-rc.1"))).toBe(false);
-  });
-
-  test("isLessThan", () => {
-    expect(SemVer.fromString("1.0.0")?.isLessThan(SemVer.fromString("1.0.0"))).toBe(false);
-    expect(SemVer.fromString("1.0.0")?.isLessThan(SemVer.fromString("1.0.0-rc.1"))).toBe(false);
-    expect(SemVer.fromString("1.0.0-rc.1")?.isLessThan(SemVer.fromString("1.0.0-rc.2"))).toBe(true);
-    expect(SemVer.fromString("1.0.0-rc.1+build.1")?.isLessThan(SemVer.fromString("1.0.0-rc.1"))).toBe(false);
-  });
-
   test("Exhaustive compare", () => {
     const versions = [
       ["0.0.2", "0.0.1", 1],
@@ -144,11 +121,14 @@ describe("Comparators", () => {
     versions.forEach(([a, b, expected]) => {
       const aSemVer = SemVer.fromString(a as string);
       const bSemVer = SemVer.fromString(b as string);
-      const compareResult = aSemVer.compareTo(bSemVer);
-      if (compareResult !== expected) {
-        console.log(a, expected === 0 ? "=" : expected === -1 ? "<" : ">", b);
+      if (!aSemVer || !bSemVer) {
+        throw new Error(`Invalid SemVer: ${a} or ${b}`);
       }
-      expect(compareResult).toBe(expected);
+
+      expect(aSemVer.compareTo(bSemVer)).toBe(expected);
+      expect(aSemVer.isEqualTo(bSemVer)).toBe(expected === 0);
+      expect(aSemVer.isGreaterThan(bSemVer)).toBe(expected === 1);
+      expect(aSemVer.isLessThan(bSemVer)).toBe(expected === -1);
     });
   });
 });
