@@ -98,7 +98,7 @@ describe("String to CalVer", () => {
     ];
 
     for (const [version, format] of versions) {
-      expect(calver.CalVer.fromString(format, version).toString()).toBe(version);
+      expect(calver.CalVer.fromString(format, version)?.toString()).toBe(version);
     }
   });
 
@@ -121,7 +121,7 @@ describe("String to CalVer", () => {
     ];
 
     for (const [version, format, expectations] of versions) {
-      expect(calver.CalVer.fromString(format, version).increment("CALENDAR").toString()).toBe(expectations);
+      expect(calver.CalVer.fromString(format, version)?.increment("CALENDAR").toString()).toBe(expectations);
     }
   });
 
@@ -143,9 +143,9 @@ describe("String to CalVer", () => {
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(calver.CalVer.fromString(format, version).increment("MAJOR").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version)?.increment("MAJOR").toString()).toBe(expectations);
       } else {
-        expect(() => calver.CalVer.fromString(format, version).increment("MAJOR")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version)?.increment("MAJOR")).toThrow();
       }
     }
   });
@@ -160,16 +160,16 @@ describe("String to CalVer", () => {
       // Incorrect increments
       ["2022.1", "YYYY.MAJOR", ""],
       ["22.1", "YY.DD", ""],
-      ["001", "0Y.MAJOR", ""],
+      ["001.9", "0Y.MAJOR", ""],
       ["1.1", "MM.MICRO", ""],
       ["01.1", "0M.WW", ""],
     ];
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(calver.CalVer.fromString(format, version).increment("MINOR").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version)?.increment("MINOR").toString()).toBe(expectations);
       } else {
-        expect(() => calver.CalVer.fromString(format, version).increment("MINOR")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version)?.increment("MINOR")).toThrow();
       }
     }
   });
@@ -191,9 +191,9 @@ describe("String to CalVer", () => {
 
     for (const [version, format, expectations] of versions) {
       if (expectations !== "") {
-        expect(calver.CalVer.fromString(format, version).increment("MICRO").toString()).toBe(expectations);
+        expect(calver.CalVer.fromString(format, version)?.increment("MICRO").toString()).toBe(expectations);
       } else {
-        expect(() => calver.CalVer.fromString(format, version).increment("MICRO")).toThrow();
+        expect(() => calver.CalVer.fromString(format, version)?.increment("MICRO")).toThrow();
       }
     }
   });
@@ -203,17 +203,12 @@ describe("String to CalVer", () => {
       // New versions
       ["2022.1.2", "YYYY.MAJOR.MINOR", "2022.1.2-build.1"],
       ["22.1-build.3", "YY.MINOR", "22.1-build.4"],
-      // Incorrect increments
-      ["2022.1-alpha", "YY.MAJOR", ""],
-      ["22.1-alpha1", "YYYY.DD", ""],
+      ["2022.1-alpha", "YYYY.MINOR", "2022.1-alpha.build.1"],
+      ["22.1-alpha1", "YY.DD", "22.1-alpha1.build.1"],
     ];
 
     for (const [version, format, expectations] of versions) {
-      if (expectations !== "") {
-        expect(calver.CalVer.fromString(format, version).increment("MODIFIER", "build").toString()).toBe(expectations);
-      } else {
-        expect(() => calver.CalVer.fromString(format, version).increment("MODIFIER")).toThrow();
-      }
+      expect(calver.CalVer.fromString(format, version)?.increment("MODIFIER", "build").toString()).toBe(expectations);
     }
   });
 });
@@ -257,6 +252,10 @@ describe("Comparators", () => {
     for (const [format, a, b, expectations] of versions) {
       const aC = calver.CalVer.fromString(format, a);
       const bC = calver.CalVer.fromString(format, b);
+      if (!aC || !bC) {
+        throw new Error(`Invalid CalVer: ${a} or ${b} for format ${format}`);
+      }
+
       expect(aC.compareTo(bC)).toBe(parseInt(expectations));
       expect(aC.isEqualTo(bC)).toBe(expectations === "0");
       expect(aC.isGreaterThan(bC)).toBe(expectations === "1");

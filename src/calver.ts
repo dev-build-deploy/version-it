@@ -100,20 +100,19 @@ export class CalVer implements IVersion<CalVer, CalVerIncrement>, ICalVer {
    * @param format CalVer formatting
    * @param versin Version string
    * @param prefix Prefix associated with the version
-   * @returns CalVer
-   * @throws Error when the version string is not compatible with Calendar Versioning
+   * @returns CalVer or null if the version string is invalid
    */
-  static fromString(format: string | IFormat, version: string, prefix?: string): CalVer {
+  static fromString(format: string | IFormat, version: string, prefix?: string): CalVer | null {
     format = typeof format === "string" ? formatFromString(format) : format;
 
     if (prefix !== undefined) {
-      if (!version.startsWith(prefix)) throw new Error("Incorrect CalVer, missing prefix");
+      if (!version.startsWith(prefix)) return null;
       version = version.substring(prefix.length);
     }
 
     const groups = format.regex.exec(version)?.groups;
     if (groups === undefined) {
-      throw new Error("Could not parse CalVer");
+      return null;
     }
 
     return new CalVer(
